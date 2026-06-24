@@ -1,23 +1,32 @@
 #!/usr/bin/env bash
-# Dev install: symlink the /product skill into ~/.claude/skills so edits go live without reinstall.
-# Gives a clean `/product` invocation (user-level skills are not plugin-namespaced).
+# Dev install: symlink the whole agent-stack (all skills + agents) into ~/.claude so edits go live
+# without reinstall. Gives clean, un-namespaced names (/product, /prototype, subagent: prototyper).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SRC="$REPO_ROOT/plugins/product/skills/product"
-DEST="$HOME/.claude/skills/product"
 
-if [[ ! -d "$SRC" ]]; then
-  echo "error: skill source not found at $SRC" >&2
-  exit 1
-fi
+link() { # $1 = source, $2 = dest
+  local src="$1" dest="$2"
+  if [[ -e "$dest" && ! -L "$dest" ]]; then
+    echo "skip: $dest exists and is not a symlink — move it aside, then re-run." >&2
+    return
+  fi
+  ln -sfn "$src" "$dest"
+  echo "linked: $dest -> $src"
+}
 
-if [[ -e "$DEST" && ! -L "$DEST" ]]; then
-  echo "error: $DEST exists and is not a symlink — refusing to overwrite." >&2
-  echo "       move it aside, then re-run." >&2
-  exit 1
-fi
+mkdir -p "$HOME/.claude/skills" "$HOME/.claude/agents"
 
-ln -sfn "$SRC" "$DEST"
-echo "linked: $DEST -> $SRC"
-echo "invoke with: /product"
+# Skills: each subdir of skills/ -> ~/.claude/skills/<name>
+for d in "$REPO_ROOT"/skills/*/; do
+  [[ -d "$d" ]] || continue
+  link "${d%/}" "$HOME/.claude/skills/$(basename "$d")"
+done
+
+# Agents: each .md in agents/ -> ~/.claude/agents/<name>.md
+for f in "$REPO_ROOT"/agents/*.md; do
+  [[ -f "$f" ]] || continue
+  link "$f" "$HOME/.claude/agents/$(basename "$f")"
+done
+
+echo "done. invoke skills with /<name>; agents via subagent_type."

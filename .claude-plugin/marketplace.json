@@ -2,27 +2,28 @@
   "name": "agent-stack",
   "owner": {
     "name": "phuc DANG",
-    "url": "https://github.com/phuc"
+    "url": "https://github.com/phucsystem"
   },
   "metadata": {
-    "description": "Personal agent stack: a thin product-orchestrator front door over a coding/product-development pipeline.",
-    "version": "0.1.0"
+    "description": "Personal agent stack: an umbrella plugin bundling product-development skills, agents, and commands. Install once, update the whole stack.",
+    "version": "0.2.0"
   },
   "plugins": [
     {
-      "name": "product",
-      "description": "Single conversational front door that turns product vision into an approved plan and shipped increment by orchestrating existing pipeline skills, with one design-approval gate.",
+      "name": "agent-stack",
+      "description": "The whole stack: /product orchestrator, prototyper agent, and supporting skills for coding and product development. One install gives every skill/agent/command; updates apply to the entire stack.",
       "author": {
         "name": "phuc DANG"
       },
-      "homepage": "https://github.com/phuc/agent-stack",
+      "homepage": "https://github.com/phucsystem/agent-stack",
       "tags": [
         "orchestration",
         "product",
+        "prototype",
         "workflow-automation",
         "planning"
       ],
-      "source": "./plugins/product"
+      "source": "."
     }
   ]
 }

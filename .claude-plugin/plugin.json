@@ -1,0 +1,16 @@
+{
+  "name": "agent-stack",
+  "version": "0.2.0",
+  "description": "Umbrella agent stack for coding and product development: /product orchestrator, prototyper agent, and supporting skills. Skills, agents, and commands are auto-discovered from skills/, agents/, commands/.",
+  "author": {
+    "name": "phuc DANG"
+  },
+  "homepage": "https://github.com/phucsystem/agent-stack",
+  "keywords": [
+    "orchestration",
+    "product",
+    "prototype",
+    "planning",
+    "workflow"
+  ]
+}
