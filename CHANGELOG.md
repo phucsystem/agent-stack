@@ -8,6 +8,8 @@ Releases are cut with `scripts/bump.sh` — never hand-edit version fields.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-25
+
 ### Added
 - `product` agent persona (`agents/product.md`) — the "who"; the `/product` skill remains the "how".
 - Dependency **preflight** in `/product` — detects which delegated skills/agents are present.
