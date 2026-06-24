@@ -1,0 +1,15 @@
+{
+  "name": "product",
+  "version": "0.1.0",
+  "description": "Single conversational front door that turns product vision into an approved plan and shipped increment by orchestrating existing pipeline skills, with one design-approval gate.",
+  "author": {
+    "name": "phuc DANG"
+  },
+  "homepage": "https://github.com/phuc/agent-stack",
+  "keywords": [
+    "orchestration",
+    "product",
+    "planning",
+    "workflow"
+  ]
+}

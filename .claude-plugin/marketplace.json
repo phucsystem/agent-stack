@@ -1,0 +1,28 @@
+{
+  "name": "agent-stack",
+  "owner": {
+    "name": "phuc DANG",
+    "url": "https://github.com/phuc"
+  },
+  "metadata": {
+    "description": "Personal agent stack: a thin product-orchestrator front door over a coding/product-development pipeline.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "product",
+      "description": "Single conversational front door that turns product vision into an approved plan and shipped increment by orchestrating existing pipeline skills, with one design-approval gate.",
+      "author": {
+        "name": "phuc DANG"
+      },
+      "homepage": "https://github.com/phuc/agent-stack",
+      "tags": [
+        "orchestration",
+        "product",
+        "workflow-automation",
+        "planning"
+      ],
+      "source": "./plugins/product"
+    }
+  ]
+}
