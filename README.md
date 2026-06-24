@@ -59,6 +59,28 @@ become first-class review material at the approval gate. You can also use it sta
 /prototype "<screens>"     # build/refresh clickable HTML mockups under agent_docs/prototypes/
 ```
 
+## Support agents
+
+`/product` is a router — it delegates real work to this roster. It owns the orchestration and the
+single approval gate; these do the specialist work.
+
+| Agent / skill | Role | Stage |
+|---|---|---|
+| `brainstormer` | Probe vision, problem-first framing | 1 — Vision intake |
+| `/lean` | MVP scoping (new product) | 2 — Task breakdown |
+| `/ipa:spec` | SRD + UI spec (new product) | 2 — Task breakdown |
+| `/ck:scout` | Codebase discovery (existing product) | 2 — Task breakdown |
+| `prototyper` | Clickable HTML mockups → `agent_docs/prototypes/` | 3 — Solution design |
+| `ui-ux-designer` | UI/UX design | 3 — Solution design |
+| `planner` | Architecture / technical design | 3 — Solution design |
+| `/ck:devops` | Deployment / infra | 3 — Solution design |
+| `/ck:databases` | Data / DB design | 3 — Solution design |
+| `/ck:plan` | Phased implementation plan → `agent_plans/` | 3 → gate |
+| `/ck:cook` | Execute the plan | 4 — Execute |
+| `/ck:ship` · `/ck:journal` | Ship + record | 5 — Ship & record |
+
+Only `prototyper` ships in this repo; the rest are existing skills/agents the stack composes.
+
 ## Install
 
 ### Option A — Claude Code plugin (primary)
