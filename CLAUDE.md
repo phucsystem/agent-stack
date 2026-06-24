@@ -18,6 +18,13 @@ for HTML) and **`agent_plans/`** (implementation plans). Never scatter outputs e
 > Note: the repo's own `ck_docs/` and `ck_plans/` hold the *meta* build artifacts of this stack
 > (its brainstorm + plan), distinct from the `agent_docs/`/`agent_plans/` runtime convention above.
 
+**Versioning:** SemVer (pre-1.0: `feat` → minor, `fix`/`docs`/`chore` → patch). Version lives in
+`plugin.json`, `marketplace.json`, and README — **never hand-edit these**. Cut releases only with
+`scripts/bump.sh <major|minor|patch>`, which syncs all version fields, rolls `CHANGELOG.md`, commits
+`chore(release): vX.Y.Z`, tags, and pushes. The pushed `v*` tag triggers `.github/workflows/release.yml`
+to publish the GitHub Release. Record user-facing changes under `## [Unreleased]` in `CHANGELOG.md` as
+you work; the bump promotes them.
+
 **Change history:**
 
 | Date | Change | Target | Reason |
@@ -28,3 +35,4 @@ for HTML) and **`agent_plans/`** (implementation plans). Never scatter outputs e
 | 2026-06-25 | Adopt `agent_docs/` + `agent_plans/` output convention | skills/product, skills/prototype, agents/prototyper | user: all agent outputs under agent_docs/agent_plans |
 | 2026-06-25 | Add `product` agent persona (orchestrator stays the skill) | agents/product, skills/product | user: build a product agent; persona "who" + skill "how" (a pure agent can't drive the slash pipeline/gate) |
 | 2026-06-25 | Dependency preflight + graceful-degradation fallbacks; README Prerequisites | skills/product, skills/prototype, README | user: handle installs without the ClaudeKit/IPA toolchain (A+B — declare/detect + degrade) |
+| 2026-06-25 | Version management: bump script + CHANGELOG + tag-triggered release workflow | scripts/bump.sh, CHANGELOG.md, .github/workflows/release.yml | user: proper version management on GitHub main |
