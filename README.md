@@ -81,6 +81,21 @@ single approval gate; these do the specialist work.
 
 Only `prototyper` ships in this repo; the rest are existing skills/agents the stack composes.
 
+## Prerequisites
+
+This stack is a thin orchestration layer — it does **not** bundle the tools `/product` delegates to.
+
+- **Standalone (no extra install):** `/prototype` and the `prototyper` agent. They only read/write
+  HTML and work on any Claude Code install.
+- **`/product` works best with the full toolchain:** [ClaudeKit](https://www.npmjs.com/package/claudekit)
+  (`npm i -g claudekit` — provides the `ck` CLI and `/ck:scout|plan|cook|devops|databases|ship|journal`
+  + the `planner`/`ui-ux-designer`/`brainstormer` agents) and the IPA/`/lean` skills.
+
+If those are missing, `/product` does **not** fail — it runs in **built-in fallback mode**:
+preflight detects which tools are absent, tells you, and substitutes a simpler built-in step for each
+(e.g. writes the plan itself instead of calling `/ck:plan`). Install the toolchain for the richer,
+gated pipeline; skip it for a lighter standalone run.
+
 ## Install
 
 ### Option A — Claude Code plugin (primary)

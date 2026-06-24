@@ -26,3 +26,5 @@ for HTML) and **`agent_plans/`** (implementation plans). Never scatter outputs e
 | 2026-06-25 | Add `prototyper` agent + `prototype` skill; wire into `/product` Stage 3 | agents/prototyper, skills/prototype, skills/product | user: prototype HTML under prototypes folder, collab with product |
 | 2026-06-25 | Restructure to single umbrella plugin (was plugin `product`) | .claude-plugin, skills/, agents/ | user: agent-stack is one installable stack of many skills/agents/commands |
 | 2026-06-25 | Adopt `agent_docs/` + `agent_plans/` output convention | skills/product, skills/prototype, agents/prototyper | user: all agent outputs under agent_docs/agent_plans |
+| 2026-06-25 | Add `product` agent persona (orchestrator stays the skill) | agents/product, skills/product | user: build a product agent; persona "who" + skill "how" (a pure agent can't drive the slash pipeline/gate) |
+| 2026-06-25 | Dependency preflight + graceful-degradation fallbacks; README Prerequisites | skills/product, skills/prototype, README | user: handle installs without the ClaudeKit/IPA toolchain (A+B — declare/detect + degrade) |

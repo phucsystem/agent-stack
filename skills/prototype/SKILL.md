@@ -47,9 +47,11 @@ pixel-perfection. The real build happens later from the approved prototype.
    animation polish or edge cases.
 
 For genuine visual-design quality (typographic scale, color systems, avoiding generic AI-slop
-layouts), lean on the existing design skills rather than reinventing them: `frontend-design` /
+layouts), lean on the existing design skills **when available**: `frontend-design` /
 `ui-ux-pro-max`. This skill owns the **prototype convention** (where files go, self-contained, fast,
-reviewable); those skills own **how to make UI look good**.
+reviewable); those skills own **how to make UI look good**. If neither is installed, this skill still
+works standalone — apply restrained, consistent defaults (sensible type scale, a small neutral
+palette, generous spacing) and keep going.
 
 ## Iteration
 
