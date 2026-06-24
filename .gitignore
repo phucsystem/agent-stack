@@ -1,0 +1,6 @@
+# Local working + runtime output folders — never tracked in git
+ck_docs/
+ck_plans/
+agent_docs/
+agent_plans/
+docs/journals/
