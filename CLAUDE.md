@@ -33,6 +33,22 @@ Never run both as leads of the same team.
 default) and gets the **human's Approve/Revise/Abort** on it before any implementation begins — the one
 human stop, mirroring `/product`.
 
+## Harness: Monetization Consultant
+
+**Goal:** Review a product — new or existing — and produce a decision-grade plan to earn, and
+sustainably grow, profit: pricing, packaging, revenue model, unit economics, and growth levers.
+
+**Trigger:** For monetization work ("how do I make money from X", "monetize", pricing/packaging
+strategy, "is this profitable", "grow revenue/profit sustainably", "business/revenue model"), use the
+**`/monetization-consultant`** orchestrator skill. Follow-ups ("re-run the analysis", "redo just the
+pricing") route as partial re-runs. Quick one-off pricing/economics questions: answer directly.
+
+**Team (5 specialists, agent-team mode):** `product-strategist` (discovery + frame NEW_PRODUCT vs
+GROW_EXISTING) → `market-research-analyst` (WTP, competitor pricing, guardrails) → `pricing-architect`
+(value metric, model, packaging) → `unit-economics-analyst` (CAC/LTV/margins/breakeven; **its verdict
+gates the pricing model**) → `growth-strategist` (retention → expansion → acquisition efficiency →
+pricing-over-time, anchored to the binding constraint). Output: `monetizer-analysis/monetization-strategy.md`.
+
 **Structure:** single umbrella plugin (`.claude-plugin/`), auto-discovered `skills/`, `agents/`,
 `commands/`. Install/update the whole stack at once. Dev: `bash scripts/dev-symlink.sh`.
 
@@ -69,3 +85,5 @@ the default `GITHUB_TOKEN` can neither push to protected `main` nor trigger `rel
 | 2026-06-25 | Gate 2 requires a design spec with diagram before implementation | agents/solution-architect, skills/solution-architect | user: solution architect must provide design specs with diagram before implementation |
 | 2026-06-25 | Add human Approve/Revise/Abort gate on the design spec before Gate 3 | agents/solution-architect, skills/solution-architect | user: yes (mirror /product's one human stop) |
 | 2026-06-25 | Merge-driven releases: `bump.yml` bumps on PR merge (level from PR title), `skip-bump` opts out; needs `RELEASE_TOKEN` PAT | .github/workflows/bump.yml | user: trigger release by merging a PR, skip when PR says skip-bump |
+| 2026-06-25 | Add monetization-consultant harness: 5-agent team + `/monetization-consultant` orchestrator + 5 specialist skills (economics gates pricing; sustainability is the bar) | agents/{product-strategist,market-research-analyst,pricing-architect,unit-economics-analyst,growth-strategist}, skills/{monetization-consultant,product-discovery,market-pricing-research,pricing-model-design,unit-economics,sustainable-growth} | user: monetizer consultant — review a product and grow profit sustainably |
+| 2026-06-25 | Add plugin update + uninstall guide (plugin and dev-symlink modes) | README | user: add guideline to update and uninstall plugin |

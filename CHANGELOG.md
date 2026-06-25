@@ -9,6 +9,15 @@ never hand-edit version fields.
 
 ## [Unreleased]
 
+### Added
+- **Monetization-consultant harness** — `/monetization-consultant` orchestrator that reviews a product
+  (new or existing) and produces a decision-grade plan to earn and sustainably grow profit. Runs a
+  5-specialist agent team: `product-strategist`, `market-research-analyst`, `pricing-architect`,
+  `unit-economics-analyst`, `growth-strategist`, plus their skills (`product-discovery`,
+  `market-pricing-research`, `pricing-model-design`, `unit-economics`, `sustainable-growth`). The
+  economics verdict gates the pricing model and *sustainable* profit is the bar, not just profitability.
+- README **Update** and **Uninstall** guide for both plugin and dev-symlink install modes.
+
 ### Changed
 - Releases are now **merge-driven**: merging a PR to `main` runs `bump.yml`, which derives the
   version level from the PR title and bumps/tags/releases. Put `skip-bump` in the PR title, body,
