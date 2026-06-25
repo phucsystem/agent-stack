@@ -12,6 +12,27 @@ prototype a screen), use the **`/product`** orchestrator skill. Prototype-only r
 **Output convention:** all runtime outputs go under **`agent_docs/`** (docs + `agent_docs/prototypes/`
 for HTML) and **`agent_plans/`** (implementation plans). Never scatter outputs elsewhere.
 
+## Harness: Solution Delivery
+
+**Goal:** Own a business or technical challenge from root cause → design (with diagram) → implementation
+→ verified output. The `solution-architect` is the accountable owner; it leads an agent team and signs
+off on verification itself.
+
+**Trigger:** For ambiguous, cross-cutting, or recurring problems where "what should we actually build,
+and does it truly work?" matters, use the **`/solution-architect`** orchestrator skill. Also for
+follow-ups: "dig deeper", "re-verify", "the fix didn't hold", "why does this keep happening". Simple
+one-line edits: do them directly.
+
+**Two peer team leads — one per engagement.** `/product` owns *what to build and why* (product framing,
+scope, the human approval gate); `/solution-architect` owns *how it's built and proven* (root-cause →
+design → implementation → verification). Pick the lead by where the risk lives — unclear problem/scope →
+`/product` leads; hard/unproven delivery → `/solution-architect` leads — and the other contributes.
+Never run both as leads of the same team.
+
+**Hard gate:** `/solution-architect` produces a solution **design spec with a diagram** (Mermaid by
+default) and gets the **human's Approve/Revise/Abort** on it before any implementation begins — the one
+human stop, mirroring `/product`.
+
 **Structure:** single umbrella plugin (`.claude-plugin/`), auto-discovered `skills/`, `agents/`,
 `commands/`. Install/update the whole stack at once. Dev: `bash scripts/dev-symlink.sh`.
 
@@ -36,3 +57,7 @@ you work; the bump promotes them.
 | 2026-06-25 | Add `product` agent persona (orchestrator stays the skill) | agents/product, skills/product | user: build a product agent; persona "who" + skill "how" (a pure agent can't drive the slash pipeline/gate) |
 | 2026-06-25 | Dependency preflight + graceful-degradation fallbacks; README Prerequisites | skills/product, skills/prototype, README | user: handle installs without the ClaudeKit/IPA toolchain (A+B — declare/detect + degrade) |
 | 2026-06-25 | Version management: bump script + CHANGELOG + tag-triggered release workflow | scripts/bump.sh, CHANGELOG.md, .github/workflows/release.yml | user: proper version management on GitHub main |
+| 2026-06-25 | Add `solution-architect` agent + `/solution-architect` orchestrator (root-cause → design → build → verify, owns verification) | agents/solution-architect, skills/solution-architect | user: solution architect that digs to root cause, coordinates other agents, owns verification |
+| 2026-06-25 | Make `product` + `solution-architect` peer team leads | agents/product, agents/solution-architect, skills/solution-architect | user: product manager and solution architect are both team leads that manage/spin up teams |
+| 2026-06-25 | Gate 2 requires a design spec with diagram before implementation | agents/solution-architect, skills/solution-architect | user: solution architect must provide design specs with diagram before implementation |
+| 2026-06-25 | Add human Approve/Revise/Abort gate on the design spec before Gate 3 | agents/solution-architect, skills/solution-architect | user: yes (mirror /product's one human stop) |

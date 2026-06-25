@@ -8,6 +8,20 @@ Releases are cut with `scripts/bump.sh` — never hand-edit version fields.
 
 ## [Unreleased]
 
+### Added
+- `solution-architect` agent (`agents/solution-architect.md`) — owns a challenge end-to-end:
+  root-cause → design → implementation → verification, and signs off on verification itself.
+- `/solution-architect` orchestrator skill (`skills/solution-architect/`) — agent-team execution
+  across four gates (Understand → Design → Implement → Verify).
+
+### Changed
+- `product` and `solution-architect` are now **peer team leads** — one leads per engagement
+  (product owns what/why, solution-architect owns how/proven); never both lead the same team.
+- `/solution-architect` Gate 2 requires a **solution design spec with a diagram** (Mermaid by
+  default) before any implementation begins.
+- `/solution-architect` adds a **human approval gate** (Approve/Revise/Abort) on the design spec
+  before implementation — the one human stop, mirroring `/product`.
+
 ## [0.3.0] - 2026-06-25
 
 ### Added
