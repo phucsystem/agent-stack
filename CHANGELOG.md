@@ -8,6 +8,8 @@ Releases are cut with `scripts/bump.sh` — never hand-edit version fields.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-25
+
 ### Added
 - `solution-architect` agent (`agents/solution-architect.md`) — owns a challenge end-to-end:
   root-cause → design → implementation → verification, and signs off on verification itself.

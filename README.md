@@ -153,7 +153,7 @@ agent-stack/
 
 ## Roadmap
 
-- **v0.3.0 (now)** — umbrella plugin; `/product` orchestrator; `prototyper` agent + `/prototype`
+- **v0.4.0 (now)** — umbrella plugin; `/product` orchestrator; `prototyper` agent + `/prototype`
   skill; `agent_docs/`/`agent_plans/` convention.
 - **Next** — more skills/agents/commands added to the stack; live end-to-end dogfood.
 - **v2** — parallel Stage-3 fan-out via `/ck:team`; portable adapters for Codex / Cursor (source kept
@@ -161,4 +161,4 @@ agent-stack/
 
 ## Status
 
-v0.3.0 — Claude Code only. Portability deferred by design.
+v0.4.0 — Claude Code only. Portability deferred by design.

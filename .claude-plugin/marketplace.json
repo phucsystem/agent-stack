@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Personal agent stack: an umbrella plugin bundling product-development skills, agents, and commands. Install once, update the whole stack.",
-    "version": "0.3.0"
+    "version": "0.4.0"
   },
   "plugins": [
     {
