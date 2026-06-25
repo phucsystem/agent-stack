@@ -4,9 +4,16 @@ All notable changes to agent-stack are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/)
 (pre-1.0: `feat` → minor, `fix`/`docs`/`chore` → patch).
 
-Releases are cut with `scripts/bump.sh` — never hand-edit version fields.
+Releases are merge-driven (`bump.yml` on PR merge; `scripts/bump.sh` is the manual escape hatch) —
+never hand-edit version fields.
 
 ## [Unreleased]
+
+### Changed
+- Releases are now **merge-driven**: merging a PR to `main` runs `bump.yml`, which derives the
+  version level from the PR title and bumps/tags/releases. Put `skip-bump` in the PR title, body,
+  or a `skip-bump` label to skip. Requires a `RELEASE_TOKEN` PAT secret. `scripts/bump.sh` stays as
+  the manual escape hatch.
 
 ## [0.4.0] - 2026-06-25
 

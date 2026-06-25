@@ -40,11 +40,18 @@ human stop, mirroring `/product`.
 > (its brainstorm + plan), distinct from the `agent_docs/`/`agent_plans/` runtime convention above.
 
 **Versioning:** SemVer (pre-1.0: `feat` → minor, `fix`/`docs`/`chore` → patch). Version lives in
-`plugin.json`, `marketplace.json`, and README — **never hand-edit these**. Cut releases only with
-`scripts/bump.sh <major|minor|patch>`, which syncs all version fields, rolls `CHANGELOG.md`, commits
-`chore(release): vX.Y.Z`, tags, and pushes. The pushed `v*` tag triggers `.github/workflows/release.yml`
-to publish the GitHub Release. Record user-facing changes under `## [Unreleased]` in `CHANGELOG.md` as
-you work; the bump promotes them.
+`plugin.json`, `marketplace.json`, and README — **never hand-edit these**.
+
+Releases are **merge-driven**: merging a PR into `main` runs `.github/workflows/bump.yml`, which derives
+the level from the PR title (`feat`→minor, `type!:`/`BREAKING CHANGE`→major, else patch) and runs
+`scripts/bump.sh` (syncs version fields, rolls `CHANGELOG.md`, commits `chore(release): vX.Y.Z`, tags,
+pushes). The pushed `v*` tag then triggers `release.yml` to publish the GitHub Release. **Skip a release**
+by putting `skip-bump` in the PR title, body, or a `skip-bump` label. Record user-facing changes under
+`## [Unreleased]` in `CHANGELOG.md` as you work; the bump promotes them.
+
+`scripts/bump.sh <major|minor|patch>` remains the manual escape hatch (run locally) and is the single
+source of truth the CI reuses. **Setup:** `bump.yml` requires a `RELEASE_TOKEN` repo secret (a PAT) —
+the default `GITHUB_TOKEN` can neither push to protected `main` nor trigger `release.yml` on the tag.
 
 **Change history:**
 
@@ -61,3 +68,4 @@ you work; the bump promotes them.
 | 2026-06-25 | Make `product` + `solution-architect` peer team leads | agents/product, agents/solution-architect, skills/solution-architect | user: product manager and solution architect are both team leads that manage/spin up teams |
 | 2026-06-25 | Gate 2 requires a design spec with diagram before implementation | agents/solution-architect, skills/solution-architect | user: solution architect must provide design specs with diagram before implementation |
 | 2026-06-25 | Add human Approve/Revise/Abort gate on the design spec before Gate 3 | agents/solution-architect, skills/solution-architect | user: yes (mirror /product's one human stop) |
+| 2026-06-25 | Merge-driven releases: `bump.yml` bumps on PR merge (level from PR title), `skip-bump` opts out; needs `RELEASE_TOKEN` PAT | .github/workflows/bump.yml | user: trigger release by merging a PR, skip when PR says skip-bump |

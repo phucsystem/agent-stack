@@ -1,0 +1,60 @@
+name: Bump on merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    # Only on a real merge, and only when the PR is not marked skip-bump
+    # (checked in the PR title, body, or a "skip-bump" label).
+    if: >
+      github.event.pull_request.merged == true &&
+      !contains(github.event.pull_request.title, 'skip-bump') &&
+      !contains(github.event.pull_request.body, 'skip-bump') &&
+      !contains(toJSON(github.event.pull_request.labels.*.name), 'skip-bump')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require RELEASE_TOKEN
+        env:
+          TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          # A PAT is required: the default GITHUB_TOKEN cannot push to protected
+          # main and its tag push would not trigger release.yml.
+          [ -n "$TOKEN" ] || { echo "::error::RELEASE_TOKEN secret is not set."; exit 1; }
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Determine bump level from PR title
+        id: level
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          level=patch
+          case "$TITLE" in
+            feat*|feature*) level=minor ;;
+          esac
+          # Breaking change marker → major (conventional `type!:` or BREAKING CHANGE).
+          if printf '%s' "$TITLE" | grep -qE '^[a-z]+(\([^)]+\))?!:' \
+             || printf '%s' "$BODY" | grep -q 'BREAKING CHANGE'; then
+            level=major
+          fi
+          echo "level=$level" >> "$GITHUB_OUTPUT"
+          echo "bump level: $level (from PR title: $TITLE)"
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version, tag, and push
+        run: bash scripts/bump.sh "${{ steps.level.outputs.level }}"
