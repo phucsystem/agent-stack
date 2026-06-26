@@ -17,8 +17,17 @@ never hand-edit version fields.
   `market-pricing-research`, `pricing-model-design`, `unit-economics`, `sustainable-growth`). The
   economics verdict gates the pricing model and *sustainable* profit is the bar, not just profitability.
 - README **Update** and **Uninstall** guide for both plugin and dev-symlink install modes.
+- **Solution-architect ASSESS engagement** — the `solution-architect` now also assesses an *existing or
+  proposed* solution, not just delivers new ones. A 3-gate Assessment Track (establish the requirement
+  baseline + risk appetite → map & assess across three lenses: requirement-fulfillment, risk introduced,
+  broken issues/regressions → verdict FULFILLS / FULFILLS-WITH-RISKS / DOES-NOT-FULFILL + remediation).
+  The verdict is the one human stop (Accept / Remediate / Re-assess); *Remediate* flips into a DELIVER
+  engagement at the design gate rather than editing silently.
 
 ### Changed
+- **Solution-architect DELIVER track now enforces TDD + reviewable slices** — big changes are split into
+  small, independently reviewable and testable slices, each driven test-first (gating test → red → green
+  → refactor).
 - Releases are now **merge-driven**: merging a PR to `main` runs `bump.yml`, which derives the
   version level from the PR title and bumps/tags/releases. Put `skip-bump` in the PR title, body,
   or a `skip-bump` label to skip. Requires a `RELEASE_TOKEN` PAT secret. `scripts/bump.sh` stays as
