@@ -14,14 +14,18 @@ for HTML) and **`agent_plans/`** (implementation plans). Never scatter outputs e
 
 ## Harness: Solution Delivery
 
-**Goal:** Own a business or technical challenge from root cause → design (with diagram) → implementation
-→ verified output. The `solution-architect` is the accountable owner; it leads an agent team and signs
-off on verification itself.
+**Goal:** Own a business or technical challenge end-to-end. Two engagement types: **DELIVER** (root cause →
+design with diagram → test-first implementation → verified output) and **ASSESS** (judge an existing or
+proposed solution against the business requirements, the risk it introduces, and what it breaks → an
+evidence-backed verdict + remediation). The `solution-architect` is the accountable owner; it leads an
+agent team and signs off itself.
 
 **Trigger:** For ambiguous, cross-cutting, or recurring problems where "what should we actually build,
 and does it truly work?" matters, use the **`/solution-architect`** orchestrator skill. Also for
-follow-ups: "dig deeper", "re-verify", "the fix didn't hold", "why does this keep happening". Simple
-one-line edits: do them directly.
+assessment: "assess this solution", "does this meet the requirements", "review this for risk", "will this
+break anything", "is this safe to ship", "audit the solution". And for follow-ups: "dig deeper",
+"re-verify", "re-assess", "the fix didn't hold", "why does this keep happening". Simple one-line edits: do
+them directly.
 
 **Two peer team leads — one per engagement.** `/product` owns *what to build and why* (product framing,
 scope, the human approval gate); `/solution-architect` owns *how it's built and proven* (root-cause →
@@ -29,9 +33,11 @@ design → implementation → verification). Pick the lead by where the risk liv
 `/product` leads; hard/unproven delivery → `/solution-architect` leads — and the other contributes.
 Never run both as leads of the same team.
 
-**Hard gate:** `/solution-architect` produces a solution **design spec with a diagram** (Mermaid by
-default) and gets the **human's Approve/Revise/Abort** on it before any implementation begins — the one
-human stop, mirroring `/product`.
+**Hard gate:** DELIVER produces a solution **design spec with a diagram** (Mermaid by default) and gets
+the **human's Approve/Revise/Abort** before any implementation begins. ASSESS produces a **verdict**
+(FULFILLS / FULFILLS-WITH-RISKS / DOES-NOT-FULFILL) and gets the **human's Accept/Remediate/Re-assess** —
+*Remediate* flips into a DELIVER engagement at the design gate (never silent edits). One human stop per
+engagement, mirroring `/product`.
 
 ## Harness: Monetization Consultant
 
@@ -87,3 +93,5 @@ the default `GITHUB_TOKEN` can neither push to protected `main` nor trigger `rel
 | 2026-06-25 | Merge-driven releases: `bump.yml` bumps on PR merge (level from PR title), `skip-bump` opts out; needs `RELEASE_TOKEN` PAT | .github/workflows/bump.yml | user: trigger release by merging a PR, skip when PR says skip-bump |
 | 2026-06-25 | Add monetization-consultant harness: 5-agent team + `/monetization-consultant` orchestrator + 5 specialist skills (economics gates pricing; sustainability is the bar) | agents/{product-strategist,market-research-analyst,pricing-architect,unit-economics-analyst,growth-strategist}, skills/{monetization-consultant,product-discovery,market-pricing-research,pricing-model-design,unit-economics,sustainable-growth} | user: monetizer consultant — review a product and grow profit sustainably |
 | 2026-06-25 | Add plugin update + uninstall guide (plugin and dev-symlink modes) | README | user: add guideline to update and uninstall plugin |
+| 2026-06-26 | Add ASSESS engagement type to solution-architect (3-gate track: establish-bar → map+assess across requirement-fulfillment/risk/broken-issues lenses → verdict + Accept/Remediate/Re-assess human stop) | agents/solution-architect, skills/solution-architect | user: solution architect also assesses an existing solution — fulfills business requirements, introduces no risk or broken issues |
+| 2026-06-26 | Bake TDD + reviewable-slice discipline into DELIVER Gate 2/3 (split big changes into independently testable slices, gating test first) | agents/solution-architect, skills/solution-architect | user: split big tasks into reviewable/testable pieces; always TDD |
