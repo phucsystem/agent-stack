@@ -86,7 +86,8 @@ never degrade silently. Still never duplicate a tool that IS present.
 | Vision brief exists, no `agent_docs/SRD.md` | **2 — Task breakdown** |
 | `SRD.md` / `UI_SPEC.md` exist in `agent_docs/`, no active `agent_plans/` plan | **3 — Solution design** |
 | Active plan in `agent_plans/` (`status: pending` / `in-progress`), no approval recorded | **3 — Approval gate** |
-| Plan approved | **4 — Execute** |
+| Plan approved, no tickets on the Project yet | **4 — Ticket the chain** (delivery-manager) |
+| Tickets created | **4.1 — Execute** |
 | Plan `status: completed`, no `agent_docs/verification.md` | **5 — Verify** |
 | `agent_docs/verification.md` exists with an all-PASS verdict | **6 — Ship & record** |
 
@@ -129,7 +130,7 @@ simple). Collect their outputs.
 |-------------|-----------|
 | Interactive HTML prototype / clickable mockup | `prototyper` agent → writes `agent_docs/prototypes/*.html` |
 | UI/UX design | `ui-ux-designer` (or `/ipa:design`) |
-| Architecture / technical | `planner` |
+| **Technical design + risk** (the proper architecture, failure modes, risks/issues) | **`solution-architect`** (its Gate 2) — see "Hand to the solution-architect" below |
 | Deployment / infra | `/ck:devops` |
 | Data / DB | `planner` + `/ck:databases` |
 
@@ -186,12 +187,42 @@ and it seeds Stage 5's acceptance + regression checks.
 
 **You own the merge.** Consolidate all specialist outputs (including links to the prototype files)
 into ONE document: `agent_docs/solution-design.md`. It must give the user a single reviewable
-picture: architecture, UI approach (with prototype links), data, deployment, key trade-offs, and —
-for changes to existing behavior — the impact analysis above.
+picture: the feature/product spec, UI approach (with prototype links), data, deployment, key
+trade-offs, and — for changes to existing behavior — the impact analysis above. At this point you
+have the **finalized product spec + prototype**; you do *not* finalize the technical design yourself.
 
-Then delegate to **`/ck:plan`** (passing `agent_docs/solution-design.md` as context, output dir
-`agent_plans/`) to produce the phased implementation plan. `/ck:plan`'s own validate / red-team
-gates remain available.
+### Hand to the solution-architect (technical design + risk)
+
+Once the spec + prototype are finalized, **hand them to `solution-architect`** to produce the *proper
+technical design and anticipate risks* — this is its Gate 2:
+
+- SA designs against the spec + the **prototype baseline** (it does not reopen product scope), and
+  produces: the technical design spec **with a diagram**, components/data flow, interface/contract
+  changes, **failure modes + a risk register (risks/issues anticipated up front)**, rollback path,
+  the impact analysis for changes to existing behavior, and a phased plan in `agent_plans/` (SA uses
+  `planner` / `/ck:plan` internally, split into reviewable test-first slices).
+- SA also confirms what **documentation** the solution will need (system architecture, API, DB,
+  integration, deployment) so "everything is written down" is planned from the start.
+
+This is a **baton pass, not co-leading**: you (PM) led framing; SA now leads the technical design.
+Only one of you leads at a time.
+
+### Joint review (PM + SA) before the human
+
+Before anything reaches the human, **PM and SA jointly review the combined deliverable** — spec +
+prototype + technical design + risk register + plan:
+
+- **PM owns product-acceptance:** does it match the intent and the prototype baseline?
+- **SA owns technical soundness:** is the design right, are the risks named and mitigated, is the
+  doc plan adequate?
+- **Tie-break:** SA holds a technical veto on soundness; PM owns the final go decision *to the human*.
+  If they disagree, the deliverable surfaces **both positions with evidence** to the human rather than
+  forcing a false consensus.
+- Scale to size (YAGNI): a substantial feature gets the full baton-pass + joint review; a trivial
+  one-screen tweak gets a lightweight SA review, not full ceremony.
+
+Record the joint sign-off (or the dissent) in `solution-design.md`, then proceed to the single human
+gate below.
 
 ---
 
@@ -203,11 +234,14 @@ After the consolidated `agent_docs/solution-design.md`, any `agent_docs/prototyp
 code before the user explicitly approves. This is the ONE review checkpoint in the whole pipeline.
 </HARD-GATE>
 
-Present to the user:
-- Consolidated solution summary (from `agent_docs/solution-design.md`).
+This gate sits **after the PM+SA joint review** — the human reviews one combined, jointly-signed-off
+deliverable, and this is the single report to them. Present:
+- Consolidated solution summary (from `agent_docs/solution-design.md`): the product spec.
 - Prototype files to open (paths under `agent_docs/prototypes/`).
+- **SA technical design** (with diagram) + **risk register** (risks/issues anticipated) + rollback path.
 - **Impact analysis** (for changes to existing behavior): what's impacted + regression risk + guarding tests.
 - Plan phase outline (titles, dependencies, acceptance criteria highlights).
+- The **joint sign-off** (PM product-acceptance + SA technical soundness) — or any recorded dissent.
 - Any open questions.
 
 Then use `AskUserQuestion`:
@@ -220,12 +254,29 @@ Then use `AskUserQuestion`:
 No feature is built without an Approve here, and no feature is accepted at Stage 5 unless the build
 matches what was approved.
 
-## Stage 4 — Execute (batch)
+## Stage 4 — Ticket the chain (delivery-manager) — before any implementation
 
-On approval, delegate to **`/ck:cook <plan-path>`** (add `--parallel` only if the user opts in).
-Execution runs all phases in batch. It stops only on a blocker or a gate failure — there is **no
+<HARD-GATE>
+After human approval and **before any implementation begins**, hand the approved plan to the
+**`delivery-manager`** (`/delivery-manager`) to create the GitHub Project tickets. **Every chain we
+build gets ticketed first** — no developer agent starts coding on work that has no ticket. Each
+feature is a ticket and each bug is a ticket, so a developer can start it and QA can verify it later.
+</HARD-GATE>
+
+The delivery-manager batches the approved plan into issues on the Project, assigns each to the
+implementing agent, sets `Status=Todo`, and links each ticket back to the plan phase / `solution-design.md`.
+Only when the tickets exist does Stage 4.1 begin.
+
+> Degrade only if `gh` / a Project is genuinely unavailable: say so explicitly and fall back to the
+> in-session task list. The default and intent is **ticket-first** — everything written down.
+
+## Stage 4.1 — Execute (batch)
+
+With tickets created, delegate to **`/ck:cook <plan-path>`** (add `--parallel` only if the user opts
+in). Execution runs all phases in batch. It stops only on a blocker or a gate failure — there is **no
 per-task approval gate** (by design). The approved `agent_docs/prototypes/*.html` serve as the
-build's visual target. Relay blockers to the user when they occur.
+build's visual target. As work progresses, the delivery-manager moves each ticket Todo → In Progress
+→ In Review → Done and links the PR (`Closes #N`). Relay blockers to the user when they occur.
 
 ## Stage 5 — Verify (you lead the team; end-to-end)  → `agent_docs/verification.md`
 

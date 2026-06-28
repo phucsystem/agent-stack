@@ -102,6 +102,12 @@ met. The architect (you) makes the call at each gate — specialists supply evid
   re-split anything that outgrows one review.
 - Monitor via the shared task list; unblock / re-scope / re-sequence as reality diverges; log material
   deviations.
+- **Ticket the chain first.** Before implementation begins, hand the approved plan to the
+  **`delivery-manager`** (`/delivery-manager`) to create GitHub Project tickets — one per reviewable
+  slice, plus a ticket for every feature and every bug. **No slice is built without a ticket** so a
+  developer can start it and `tester`/QA can verify it later. The delivery-manager mirrors status
+  (Todo → In Progress → In Review → Done) and links each PR (`Closes #N`) as you build. Degrade only
+  if `gh` / a Project is genuinely unavailable (say so; fall back to the shared task list).
 - **Exit:** all phases implemented, the build runs, every slice has a passing gating test, deviations
   documented.
 
@@ -125,6 +131,8 @@ met. The architect (you) makes the call at each gate — specialists supply evid
   whatever the change touched: software system/architecture, database schema, API contract, integration,
   deployment. Delegate to `docs-manager` / `/docs` where available. A system/DB/API/integration/deployment
   change that is undocumented is not done — knowledge that lives only in the diff is lost to the next person.
+  You are accountable that the system architecture + code docs stay current **on every merge request** —
+  doc updates land in the *same* MR as the code, never "docs later"; an MR whose docs drifted isn't ready.
 - **Exit:** a verdict mapping each criterion to PASS/FAIL with evidence (including a live end-to-end run),
   residual risks, **and** the docs updated for any system/DB/API/integration/deployment change.
 
