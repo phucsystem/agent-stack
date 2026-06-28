@@ -1,0 +1,55 @@
+name: Version check
+
+# Enforces the manual-bump-per-PR policy: every PR into main must bump the version
+# (via scripts/bump.sh) unless it opts out with "skip-bump". The actual release is cut
+# after merge by tag-on-merge.yml → release.yml.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  version-check:
+    if: >
+      !contains(github.event.pull_request.title, 'skip-bump') &&
+      !contains(github.event.pull_request.body, 'skip-bump') &&
+      !contains(toJSON(github.event.pull_request.labels.*.name), 'skip-bump')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require a version bump vs the base branch
+        env:
+          BASE: ${{ github.event.pull_request.base.ref }}
+        run: |
+          ver() { python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['version'])" "$1"; }
+          new=$(ver .claude-plugin/plugin.json)
+
+          git fetch --no-tags origin "$BASE"
+          old=$(git show "origin/$BASE:.claude-plugin/plugin.json" \
+                | python3 -c "import json,sys;print(json.load(sys.stdin)['version'])")
+
+          # new must be strictly greater than base (semver order via sort -V).
+          higher=$(printf '%s\n%s\n' "$old" "$new" | sort -V | tail -1)
+          if [ "$new" = "$old" ] || [ "$higher" != "$new" ]; then
+            echo "::error::version not bumped (base=$old, head=$new). Run 'scripts/bump.sh <major|minor|patch>' on this branch, or add 'skip-bump' to the PR title/body/label."
+            exit 1
+          fi
+
+          # version fields must stay in sync, and the changelog must carry the new section.
+          mkt=$(python3 -c "import json;print(json.load(open('.claude-plugin/marketplace.json'))['metadata']['version'])")
+          if [ "$mkt" != "$new" ]; then
+            echo "::error::marketplace.json version ($mkt) != plugin.json ($new). Use scripts/bump.sh so the fields stay in sync."
+            exit 1
+          fi
+          if ! grep -q "## \[$new\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [$new]' section. Use scripts/bump.sh to roll the changelog."
+            exit 1
+          fi
+
+          echo "version bump OK: $old -> $new"

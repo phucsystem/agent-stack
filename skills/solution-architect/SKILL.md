@@ -70,10 +70,16 @@ met. The architect (you) makes the call at each gate — specialists supply evid
 ### Gate 2 — Design (complete solution + design spec)  → `_workspace/02_solution-design.md` + plan
 - Generate 2–3 genuinely different approaches (`brainstormer` when the space is wide). Score on fit to
   root cause, risk, effort, reversibility. Choose one; one-line rejection rationale for the rest.
+- **For a change to existing behavior, do an impact analysis *before* implementation** (part of the
+  spec, reviewed at the human gate): the fields/columns, functions, endpoints, contracts, and downstream
+  consumers the change ripples into (trace with `debugger` / an impact-radius query where available —
+  don't guess), the **regression risk** (what could break), the regression tests that already cover it,
+  and the new regression tests to write first. Untestable or unacceptable risk → say so before any code.
 - **Write the solution design spec — this is a hard gate, no implementation starts until it exists.**
   The spec (`_workspace/02_solution-design.md`) must contain: chosen approach + rejected alternatives,
-  components touched, data flow, interface/contract changes, failure modes, rollback path, and **at least
-  one diagram**. Default to Mermaid embedded in the markdown (architecture / data-flow / sequence —
+  components touched, data flow, interface/contract changes, the impact analysis (impacted
+  fields/consumers + regression risk + guarding tests) for any change to existing behavior, failure
+  modes, rollback path, and **at least one diagram**. Default to Mermaid embedded in the markdown (architecture / data-flow / sequence —
   pick what best shows how the pieces connect); reach for `excalidraw` or `tech-graph` only for a
   publish-grade visual. A diagram that doesn't show connections doesn't count.
 - Hand the chosen approach to `planner` for a phased plan with file ownership, dependency order, and a
@@ -100,14 +106,27 @@ met. The architect (you) makes the call at each gate — specialists supply evid
   documented.
 
 ### Gate 4 — Verify (own the output)  → `_workspace/04_verification.md`
-- Your signature responsibility. Drive `tester` (run the real tests) and `code-reviewer` (correctness,
-  security, regressions). Then add your own **boundary verification**: read *both sides* of each
-  integration (API ↔ consumer, request ↔ response, before ↔ after metric) and confirm shapes/behavior
-  match. Existence ≠ correctness.
-- Check the output against **every** Gate-1 success criterion, one by one: PASS/FAIL + evidence each.
+- Your signature responsibility, run **after the team finishes implementing**. *You* sign off, not the
+  builders — never delegate the verdict. The gate answers "does the whole thing actually work as
+  expected?" through three layers, in order:
+  1. **Tests & review** — drive `tester` (run the full real test suite, not just the per-slice gating
+     tests) and `code-reviewer` (correctness, security, regressions).
+  2. **End-to-end behavioral verification** — actually run the integrated solution and exercise the real
+     user/consumer flows; confirm it behaves **as expected end-to-end**, not just that isolated tests
+     pass. Use the `verify`/`run` skill (or have `tester` start the app/service) to reproduce each success
+     scenario live. Green tests ≠ it works — observe the behavior yourself.
+  3. **Boundary verification** — read *both sides* of each integration (API ↔ consumer, request ↔
+     response, before ↔ after metric); confirm shapes/behavior match. Existence ≠ correctness.
+- Check the output against **every** Gate-1 success criterion, one by one: PASS/FAIL + evidence each (note
+  which layer proved it).
 - Any FAIL → loop back to Gate 3 **once** with a targeted fix. Still failing → stop, report honestly what
   does not work, surface residual risk. Never declare success on unverified output.
-- **Exit:** a verdict mapping each criterion to PASS/FAIL with evidence, plus residual risks.
+- **Capture the knowledge — documentation is a deliverable.** Before closing, update the project's docs for
+  whatever the change touched: software system/architecture, database schema, API contract, integration,
+  deployment. Delegate to `docs-manager` / `/docs` where available. A system/DB/API/integration/deployment
+  change that is undocumented is not done — knowledge that lives only in the diff is lost to the next person.
+- **Exit:** a verdict mapping each criterion to PASS/FAIL with evidence (including a live end-to-end run),
+  residual risks, **and** the docs updated for any system/DB/API/integration/deployment change.
 
 ## The Assessment Track (ASSESS engagements)
 
@@ -157,14 +176,17 @@ DNA, three gates. You own the verdict; you do **not** edit the solution here.
 
 1. **Spin up the team** via the `team` skill, with `solution-architect` as lead and specialists staffed by
    gate need. DELIVER: Gate 1 researcher + debugger; Gate 2 brainstormer + planner; Gate 3
-   fullstack-developer; Gate 4 tester + code-reviewer. ASSESS: Gate A researcher; Gate B debugger +
+   fullstack-developer; Gate 4 tester + code-reviewer + `docs-manager` (capture the change in docs).
+ASSESS: Gate A researcher; Gate B debugger +
    code-reviewer + tester. Keep it lean — 3–5 active members; reconstitute between gates rather than
    running everyone at once.
 2. **Seed the shared task list** (`TaskCreate`) with the four gates as dependency-ordered tasks
    (Gate 1 → 2 → 3 → 4). State file-ownership boundaries in each implementation task.
 3. **Coordinate** via `SendMessage`; teammates self-organize within a gate. You hold the gate: do not open
    the next until exit criteria are met.
-4. **Own Gate 4 yourself** — run the final verification and write the verdict. Do not delegate the sign-off.
+4. **Own Gate 4 yourself** — after the team reports implementation done, run the final verification
+   (tests & review → live end-to-end run → boundary checks) and write the verdict. Do not delegate the
+   sign-off.
 
 If the `team` skill is unavailable, fall back to sub-agent orchestration: spawn each specialist with the
 `Agent` tool (`model: "opus"`), `run_in_background` for independent investigation, and collect results via
@@ -193,7 +215,8 @@ file-based handoff in `_workspace/`. Quality bar and gate discipline are identic
 → Gate 1: debugger traces the checkout flow, researcher checks domain patterns; root cause = a payment
 retry that silently fails on one gateway; success criterion = "abandonment at payment step < 2%". → Gate 2:
 brainstormer + planner produce a retry-with-fallback design + phased plan. → Gate 3: fullstack-developer
-implements. → Gate 4: tester + architect verify the metric on the boundary; PASS/FAIL verdict written.
+implements. → Gate 4: tester runs the suite, the architect runs the live checkout flow end-to-end and
+verifies the metric on the boundary; PASS/FAIL verdict written.
 
 **Error flow:** Gate 4 finds the metric still failing after the fix → architect loops to Gate 3 once with a
 targeted change; if it still fails, the run stops with an honest "criterion 2 FAIL, residual risk: gateway B

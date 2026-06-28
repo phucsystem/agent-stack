@@ -1,0 +1,46 @@
+name: Tag on merge
+
+# The version is bumped manually in each PR (scripts/bump.sh) and enforced by version-check.yml.
+# This workflow does NOT bump — on merge it reads the already-bumped version from main and pushes
+# the matching v* tag, which triggers release.yml to publish the GitHub Release. Tagging happens
+# post-merge (not in the PR) so a release is never cut from un-merged code.
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require RELEASE_TOKEN
+        env:
+          TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          # A PAT is required: a tag pushed with the default GITHUB_TOKEN would not trigger release.yml.
+          [ -n "$TOKEN" ] || { echo "::error::RELEASE_TOKEN secret is not set."; exit 1; }
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Tag the merged version (if not already tagged)
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          tag="v$version"
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "tag $tag already exists — nothing to release (PR likely used skip-bump)."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$tag"
+          git push origin "$tag"
+          echo "pushed $tag — release.yml will publish the GitHub Release."

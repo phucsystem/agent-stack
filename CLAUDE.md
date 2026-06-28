@@ -2,8 +2,11 @@
 
 ## Harness: Product Development Stack
 
-**Goal:** One front door (`/product`) drives a product from vision → approved design → shipped
-increment; a `prototyper` agent produces clickable HTML mockups for the design review.
+**Goal:** One front door (`/product`) drives a product from vision → approved design → built →
+**team-led end-to-end verification** → shipped increment; a `prototyper` agent produces clickable HTML
+mockups for the design review. The approved prototypes become the project's **baseline** (single
+source of truth): every later feature is designed against it and the built increment is accepted only
+if it matches that baseline.
 
 **Trigger:** For product-development work (new or existing product, "build X", plan a feature,
 prototype a screen), use the **`/product`** orchestrator skill. Prototype-only requests → the
@@ -64,16 +67,18 @@ pricing-over-time, anchored to the binding constraint). Output: `monetizer-analy
 **Versioning:** SemVer (pre-1.0: `feat` → minor, `fix`/`docs`/`chore` → patch). Version lives in
 `plugin.json`, `marketplace.json`, and README — **never hand-edit these**.
 
-Releases are **merge-driven**: merging a PR into `main` runs `.github/workflows/bump.yml`, which derives
-the level from the PR title (`feat`→minor, `type!:`/`BREAKING CHANGE`→major, else patch) and runs
-`scripts/bump.sh` (syncs version fields, rolls `CHANGELOG.md`, commits `chore(release): vX.Y.Z`, tags,
-pushes). The pushed `v*` tag then triggers `release.yml` to publish the GitHub Release. **Skip a release**
-by putting `skip-bump` in the PR title, body, or a `skip-bump` label. Record user-facing changes under
-`## [Unreleased]` in `CHANGELOG.md` as you work; the bump promotes them.
+Releases are **bump-in-PR**: you bump the version manually in each PR *before* merge by running
+`scripts/bump.sh <major|minor|patch>` on the branch — it syncs the version fields, rolls `CHANGELOG.md`,
+and commits `chore(release): vX.Y.Z` (it does **not** tag or push). `.github/workflows/version-check.yml`
+**fails any PR** whose `plugin.json` version isn't strictly above `main` (or whose `marketplace.json` /
+`CHANGELOG.md` are out of sync) — **skip** with `skip-bump` in the PR title, body, or a `skip-bump` label.
+On merge, `.github/workflows/tag-on-merge.yml` reads the merged version and pushes the `v*` tag, which
+triggers `release.yml` to publish the GitHub Release. Record user-facing changes under `## [Unreleased]`
+in `CHANGELOG.md` as you work; `bump.sh` promotes them into the new version section.
 
-`scripts/bump.sh <major|minor|patch>` remains the manual escape hatch (run locally) and is the single
-source of truth the CI reuses. **Setup:** `bump.yml` requires a `RELEASE_TOKEN` repo secret (a PAT) —
-the default `GITHUB_TOKEN` can neither push to protected `main` nor trigger `release.yml` on the tag.
+Choose the bump level yourself (`feat`→minor, breaking→major, else patch). **Setup:** `tag-on-merge.yml`
+requires a `RELEASE_TOKEN` repo secret (a PAT) — a tag pushed with the default `GITHUB_TOKEN` would not
+trigger `release.yml`.
 
 **Change history:**
 
@@ -95,3 +100,9 @@ the default `GITHUB_TOKEN` can neither push to protected `main` nor trigger `rel
 | 2026-06-25 | Add plugin update + uninstall guide (plugin and dev-symlink modes) | README | user: add guideline to update and uninstall plugin |
 | 2026-06-26 | Add ASSESS engagement type to solution-architect (3-gate track: establish-bar → map+assess across requirement-fulfillment/risk/broken-issues lenses → verdict + Accept/Remediate/Re-assess human stop) | agents/solution-architect, skills/solution-architect | user: solution architect also assesses an existing solution — fulfills business requirements, introduces no risk or broken issues |
 | 2026-06-26 | Bake TDD + reviewable-slice discipline into DELIVER Gate 2/3 (split big changes into independently testable slices, gating test first) | agents/solution-architect, skills/solution-architect | user: split big tasks into reviewable/testable pieces; always TDD |
+| 2026-06-28 | Strengthen DELIVER Gate 4: after the team implements, the architect runs a 3-layer verification (tests & review → live end-to-end behavioral run → boundary checks) — "tests green" ≠ "works as expected" | agents/solution-architect, skills/solution-architect | user: after leading the team to implement, verify it works as expected |
+| 2026-06-28 | `/product`: approved prototypes become the project's **prototype baseline** (source of truth); later features must align to it and surface any deviation as a knowing baseline change; prototyper conforms new screens to the baseline | skills/product, agents/product, agents/prototyper | user: align the prototype chain to the approved prototype baseline; every feature gated by approval |
+| 2026-06-28 | `/product`: add **Stage 5 — Verify** (product leads the team end-to-end before ship; accept the increment against the prototype baseline + success criteria with full confidence; ship only on all-PASS) — Ship becomes Stage 6 | skills/product, agents/product | user: product leads team end-to-end verification — no unexpected behavior, accepted behavior 100% confident |
+| 2026-06-28 | Both leads: changes to existing behavior require a pre-implementation **impact analysis** (impacted fields/components/consumers + regression risk + guarding tests) reviewed at the design/approval gate before any code | agents/solution-architect, skills/solution-architect, agents/product, skills/product | user: before implementing a change to existing behavior, do impact analysis + regression risk |
+| 2026-06-28 | solution-architect: **documentation is a deliverable** — any software-system / DB / API-contract / integration / deployment change must be captured in project docs (delegate `docs-manager`/`/docs`) before the engagement is done; added to Gate 4 exit + checklist + roster | agents/solution-architect, skills/solution-architect | user: docs are part of the architect's deliverables; maintain knowledge across the project |
+| 2026-06-28 | Releases switch from merge-driven auto-bump to **bump-in-PR**: `bump.sh` bumps+commits on the branch (no tag/push); `version-check.yml` fails un-bumped PRs (`skip-bump` opts out); `tag-on-merge.yml` tags the merged version → `release.yml` | .github/workflows (bump.yml→version-check.yml + tag-on-merge.yml), scripts/bump.sh | user: bump version manually for every PR before merge |

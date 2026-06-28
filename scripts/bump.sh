@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# The ONLY way to bump agent-stack's version. Syncs version across all files, rolls the changelog,
-# commits, tags, and pushes. The pushed tag triggers .github/workflows/release.yml to cut the
-# GitHub Release. Never hand-edit version fields — that is how drift happens.
+# The ONLY way to bump agent-stack's version. Run it on your PR branch BEFORE merge: it syncs the
+# version across all files, rolls the changelog, and commits — it does NOT tag or push. version-check.yml
+# fails any PR that didn't bump (unless it says skip-bump). On merge, tag-on-merge.yml pushes the v* tag,
+# which triggers release.yml to cut the GitHub Release. Never hand-edit version fields — that is drift.
 #
-# Usage: scripts/bump.sh <major|minor|patch>
+# Usage: scripts/bump.sh <major|minor|patch>   (then: git push; open/merge the PR)
 set -euo pipefail
 
 LEVEL="${1:-}"
@@ -50,7 +51,5 @@ PY
 
 git add -A
 git commit -q -m "chore(release): v$NEW"
-git tag "v$NEW"
-git push -q origin HEAD
-git push -q origin "v$NEW"
-echo "released v$NEW — tag pushed; release workflow will publish the GitHub Release."
+echo "committed chore(release): v$NEW on $(git rev-parse --abbrev-ref HEAD)."
+echo "next: 'git push', then open/merge the PR — tag-on-merge.yml tags v$NEW and release.yml publishes."
