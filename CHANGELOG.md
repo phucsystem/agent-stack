@@ -4,10 +4,12 @@ All notable changes to agent-stack are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/)
 (pre-1.0: `feat` → minor, `fix`/`docs`/`chore` → patch).
 
-Releases are merge-driven (`bump.yml` on PR merge; `scripts/bump.sh` is the manual escape hatch) —
-never hand-edit version fields.
+Releases are bump-in-PR: run `scripts/bump.sh <level>` on the branch before merge; `version-check.yml`
+enforces it and `tag-on-merge.yml` tags the merged version. Never hand-edit version fields.
 
 ## [Unreleased]
+
+## [0.5.0] - 2026-06-28
 
 ### Added
 - **Monetization-consultant harness** — `/monetization-consultant` orchestrator that reviews a product
