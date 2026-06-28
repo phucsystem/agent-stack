@@ -9,6 +9,31 @@ enforces it and `tag-on-merge.yml` tags the merged version. Never hand-edit vers
 
 ## [Unreleased]
 
+### Added
+- **Delivery / GitHub Project Management harness** — a `delivery-manager` agent that owns a GitHub
+  Project board: turns an approved plan or feature batch into tracked issues (tasks), assigns each to
+  the implementing agent, drives every ticket Backlog → Todo → In Progress → In Review → Done, files
+  bug tickets, and reports. Front door is the `/delivery-manager` orchestrator; the
+  `github-project-management` skill holds the `gh`/Projects-v2 mechanics. Wired into `/product`
+  (Stage 4) and `/solution-architect` (Gate 3) as a ticket-first step before implementation
+  (degrades gracefully when `gh`/a Project is unavailable).
+- **Reporting & quality** in the delivery-manager — project/weekly summaries with risk callouts,
+  on-demand bug-ticket creation, and a quality report: features completed this week vs bugs introduced
+  from the weekly release (the bug-injection signal).
+
+### Changed
+- **`/product` flow is now baton-pass + joint review + a single human gate.** The PM finalizes the
+  product spec + prototype, then hands the *technical design + risk anticipation* to
+  `solution-architect` (its Gate 2). PM and SA jointly review the combined deliverable (PM owns
+  product-acceptance, SA owns technical soundness with a veto; dissent is surfaced to the human) before
+  the one human report. The joint review replaces a second human gate.
+- **Ticket-first is now a hard gate.** After approval and before any implementation, the
+  `delivery-manager` creates the GitHub Project tickets for the chain — every feature and every bug is
+  a ticket so a developer can start and QA can verify. Applies to both `/product` (Stage 4) and
+  `/solution-architect` (Gate 3); degrades only when `gh`/a Project is genuinely unavailable.
+- **Solution-architect owns documentation currency per merge request** — system-architecture and code
+  docs land in the same MR as the code (never "docs later"); an MR whose docs drifted isn't ready.
+
 ## [0.5.0] - 2026-06-28
 
 ### Added
