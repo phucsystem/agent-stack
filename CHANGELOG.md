@@ -9,6 +9,8 @@ enforces it and `tag-on-merge.yml` tags the merged version. Never hand-edit vers
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-06-29
+
 ### Added
 - **Delivery / GitHub Project Management harness** — a `delivery-manager` agent that owns a GitHub
   Project board: turns an approved plan or feature batch into tracked issues (tasks), assigns each to
