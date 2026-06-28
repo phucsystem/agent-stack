@@ -29,6 +29,11 @@ rules). Read it at the start of your work. In short:
 
 - **Spec first.** Read `agent_docs/SRD.md` / `UI_SPEC.md` and any design tokens before designing; do
   not contradict them. If none exist, ask the caller for the screen list and intended look.
+- **Baseline-consistent.** If approved prototypes already exist in `agent_docs/prototypes/` (the
+  project's prototype baseline), read them first and make new screens *extend* that established
+  design system, components, layout, and navigation — do not reinvent the look per feature. If a new
+  feature genuinely needs to deviate or evolve the design system, do not silently diverge: note the
+  deviation in the README and surface it to the caller so the human approves the baseline change.
 - **Fast over perfect.** Optimize for "good enough to react to." Spend effort on layout, flow, and
   hierarchy — not animation polish or edge cases.
 - **Real-ish content,** not lorem ipsum, so the design can be judged honestly.

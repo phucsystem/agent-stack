@@ -25,13 +25,36 @@ never hand-edit version fields.
   engagement at the design gate rather than editing silently.
 
 ### Changed
+- **Solution-architect now treats documentation as a deliverable.** Any change to the software system,
+  database schema, API contract, integration, or deployment must be captured in the project's docs
+  (delegating to `docs-manager` / `/docs`) before the engagement closes — added to Gate 4's exit
+  criteria, the behavioral checklist, and the team roster. Knowledge that lives only in the diff is lost.
+- **Both leads now require a pre-implementation impact analysis for changes to existing behavior.**
+  Before any code, `solution-architect` (Gate 2) and `/product` (Stage 3) enumerate the impacted
+  fields/components/endpoints/consumers, state the regression risk, and name the regression tests that
+  already cover it plus the new ones to write first — reviewed at the design/approval gate.
+- **`/product` now treats the approved prototypes as the project's baseline (single source of truth).**
+  On approval, the prototypes + `solution-design.md` become the baseline of record; every later feature
+  must be designed/prototyped to align with it, and any deviation is surfaced as a knowing baseline
+  change rather than a silent drift. The `prototyper` conforms new screens to the existing baseline.
+- **`/product` adds Stage 5 — Verify: the product leads the team in end-to-end verification before
+  ship.** After the build, the product confirms the accepted behavior works fully and with confidence
+  (no unexpected behavior) and that the increment matches the approved prototype baseline — mapping
+  every success criterion and prototype flow to PASS/FAIL in `agent_docs/verification.md`. Ship (now
+  Stage 6) only proceeds on an all-PASS verdict.
+- **Solution-architect DELIVER Gate 4 now requires end-to-end verification after the team implements** —
+  once the team reports the build done, the architect runs three layers before signing off: tests &
+  review → a live end-to-end behavioral run of the integrated solution → boundary checks. "Tests green"
+  is no longer accepted as "works as expected"; the verdict must include a live run.
 - **Solution-architect DELIVER track now enforces TDD + reviewable slices** — big changes are split into
   small, independently reviewable and testable slices, each driven test-first (gating test → red → green
   → refactor).
-- Releases are now **merge-driven**: merging a PR to `main` runs `bump.yml`, which derives the
-  version level from the PR title and bumps/tags/releases. Put `skip-bump` in the PR title, body,
-  or a `skip-bump` label to skip. Requires a `RELEASE_TOKEN` PAT secret. `scripts/bump.sh` stays as
-  the manual escape hatch.
+- Releases are now **bump-in-PR**: run `scripts/bump.sh <level>` on the PR branch before merge (it
+  bumps the version fields, rolls the changelog, and commits — no tag/push). `version-check.yml` fails
+  any PR that didn't bump `plugin.json` above `main` (or left `marketplace.json`/`CHANGELOG.md` out of
+  sync); `skip-bump` in the PR title/body/label opts out. On merge, `tag-on-merge.yml` pushes the `v*`
+  tag, triggering `release.yml`. Requires a `RELEASE_TOKEN` PAT secret. (Replaces the prior
+  merge-driven auto-bump `bump.yml`.)
 
 ## [0.4.0] - 2026-06-25
 

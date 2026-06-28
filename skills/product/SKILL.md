@@ -1,10 +1,10 @@
 ---
 name: product
-description: "Single conversational front door for product development. Talk vision, get a task breakdown, review ONE consolidated design (with interactive HTML prototypes), approve, then autonomous build. Orchestrates existing pipeline skills and the prototyper agent."
+description: "Single conversational front door for product development. Talk vision, get a task breakdown, review ONE consolidated design (with interactive HTML prototypes), approve, then autonomous build, then team-led end-to-end verification before ship. The approved prototypes become the project's baseline (single source of truth) that every later feature must align to and be accepted against. Orchestrates existing pipeline skills and the prototyper agent. Also handles follow-ups: 'resume the product', 'add a feature', 'verify the increment', 'does this match the prototype', 'update the baseline'."
 user-invocable: true
-when_to_use: "Invoke to start or resume work on any product (new or existing) and drive it from vision to shipped increment through one front door."
+when_to_use: "Invoke to start or resume work on any product (new or existing) and drive it from vision through approved design, build, and verified ship through one front door. Re-invoke to add features that must align to the prototype baseline, or to re-verify a built increment."
 category: orchestration
-keywords: [product, orchestrator, vision, plan, pipeline, front-door, prototype]
+keywords: [product, orchestrator, vision, plan, pipeline, front-door, prototype, baseline, prototype-baseline, verify, verification, end-to-end, acceptance, source-of-truth]
 metadata:
   author: phuc DANG
   version: "0.2.0"
@@ -87,7 +87,8 @@ never degrade silently. Still never duplicate a tool that IS present.
 | `SRD.md` / `UI_SPEC.md` exist in `agent_docs/`, no active `agent_plans/` plan | **3 — Solution design** |
 | Active plan in `agent_plans/` (`status: pending` / `in-progress`), no approval recorded | **3 — Approval gate** |
 | Plan approved | **4 — Execute** |
-| Plan `status: completed` | **5 — Ship & record** |
+| Plan `status: completed`, no `agent_docs/verification.md` | **5 — Verify** |
+| `agent_docs/verification.md` exists with an all-PASS verdict | **6 — Ship & record** |
 
 When the state is ambiguous, announce your best guess and ask the user to confirm before any
 non-read action.
@@ -146,9 +147,47 @@ just prose. Delegate to the **`prototyper` agent** (Task tool, `subagent_type: p
 The prototypes are **first-class review material** at the approval gate: the user reviews the live
 HTML alongside the written design before approving the build.
 
+### Align to the prototype baseline
+
+Once a design + prototype set has been approved and verified, it is the project's **prototype
+baseline** — the canonical "point of view" (design system, components, layout patterns, navigation,
+interaction behavior) the whole product is built and judged against. It lives in the approved
+`agent_docs/prototypes/` set + `agent_docs/solution-design.md`.
+
+When a baseline already exists (you are adding a feature to a product that has shipped approved
+prototypes before):
+
+- **Pass the existing baseline to the prototyper as the reference**, not just the new screen list.
+  Every new screen/flow must *extend* the baseline consistently — reuse its design system,
+  components, and patterns — rather than invent a divergent look.
+- **A divergence from the baseline is itself a baseline change.** Never let new work silently drift
+  the look/behavior. If a new feature genuinely needs to deviate (or evolve the design system),
+  surface that explicitly in `solution-design.md` and at the approval gate so the human approves the
+  baseline change knowingly.
+- The chain is one-directional and gated: vision → design/prototype → **approval** → build →
+  verification → the increment becomes (or stays consistent with) the baseline. No feature is built
+  unapproved, and no built feature is accepted unless it matches the approved prototype.
+
+### Impact analysis before approval (changes to existing behavior)
+
+When the work changes existing behavior (the common case on an existing product), include an **impact
+analysis in `solution-design.md` before the approval gate** — the human approves the change knowing
+its blast radius, not blind:
+
+- **What's impacted:** the fields/columns, components, endpoints, contracts, and downstream consumers
+  the change ripples into. Trace it (delegate to `/ck:scout` / `planner`, or an impact-radius query
+  where a code graph is available) — do not guess.
+- **Regression risk:** what existing behavior could break, which regression tests already cover it,
+  and which new regression tests must be written first to guard it.
+- **The call:** if the risk is unacceptable or untestable, surface that at the gate before any build.
+
+The impact analysis (when applicable) is part of what the human reviews to Approve / Revise / Abort,
+and it seeds Stage 5's acceptance + regression checks.
+
 **You own the merge.** Consolidate all specialist outputs (including links to the prototype files)
 into ONE document: `agent_docs/solution-design.md`. It must give the user a single reviewable
-picture: architecture, UI approach (with prototype links), data, deployment, and key trade-offs.
+picture: architecture, UI approach (with prototype links), data, deployment, key trade-offs, and —
+for changes to existing behavior — the impact analysis above.
 
 Then delegate to **`/ck:plan`** (passing `agent_docs/solution-design.md` as context, output dir
 `agent_plans/`) to produce the phased implementation plan. `/ck:plan`'s own validate / red-team
@@ -167,13 +206,19 @@ code before the user explicitly approves. This is the ONE review checkpoint in t
 Present to the user:
 - Consolidated solution summary (from `agent_docs/solution-design.md`).
 - Prototype files to open (paths under `agent_docs/prototypes/`).
+- **Impact analysis** (for changes to existing behavior): what's impacted + regression risk + guarding tests.
 - Plan phase outline (titles, dependencies, acceptance criteria highlights).
 - Any open questions.
 
 Then use `AskUserQuestion`:
-- **Approve** → proceed to Stage 4.
+- **Approve** → the approved `agent_docs/prototypes/*.html` + `solution-design.md` become the
+  **prototype baseline of record** (the build's visual/behavioral target *and* the acceptance bar at
+  Stage 5). Proceed to Stage 4.
 - **Revise** → loop back into Stage 3 (re-run specialists / prototyper for the changed parts).
 - **Abort** → stop cleanly; leave docs/plan/prototypes in place.
+
+No feature is built without an Approve here, and no feature is accepted at Stage 5 unless the build
+matches what was approved.
 
 ## Stage 4 — Execute (batch)
 
@@ -182,10 +227,33 @@ Execution runs all phases in batch. It stops only on a blocker or a gate failure
 per-task approval gate** (by design). The approved `agent_docs/prototypes/*.html` serve as the
 build's visual target. Relay blockers to the user when they occur.
 
-## Stage 5 — Ship & Record
+## Stage 5 — Verify (you lead the team; end-to-end)  → `agent_docs/verification.md`
 
-When execution completes, offer **`/ck:ship`** then **`/ck:journal`**. Update the product's
-`agent_docs/` so the next `/product` invocation resumes cleanly.
+"The build ran" is not "it works." Before shipping you **lead the team to verify the increment
+end-to-end** — the bar is: the accepted behavior works **fully, with high confidence, and nothing
+behaves unexpectedly**. You own this acceptance sign-off; you do not ship on unverified output.
+
+1. **Delegate the verification depth.** `tester` runs the real suite; `code-reviewer` covers
+   correctness / security / regressions. When the delivery risk is technical, pull in
+   `solution-architect` (your peer) to run its Gate-4 verification and report back — but the product
+   acceptance call stays yours.
+2. **Run it end-to-end the way the user will.** Use the `verify` / `run` skill (or have `tester`
+   start the app/service) and reproduce each success scenario live — observe the behavior, don't
+   infer it from green tests.
+3. **Accept against the prototype baseline.** Walk the shipped increment against the approved
+   `agent_docs/prototypes/*.html` screen-by-screen and flow-by-flow: does what shipped match the
+   approved point of view? "A page renders" is not "it matches the baseline." Note any drift.
+4. **Map evidence to a verdict.** Every Stage-1 success criterion **and** every approved prototype
+   flow → PASS/FAIL with evidence, written to `agent_docs/verification.md`. Any FAIL or unexpected
+   behavior → loop back to Stage 4 **once** with a targeted fix; if it still fails, stop and report
+   honestly (what works, what does not, residual risk). Only an all-PASS verdict proceeds to ship.
+
+## Stage 6 — Ship & Record
+
+Only after the Stage-5 verdict is all-PASS: offer **`/ck:ship`** then **`/ck:journal`**. Record the
+approved + verified prototypes and `solution-design.md` as the **baseline of record** — note the
+baseline status in `agent_docs/prototypes/README.md` — so the next `/product` feature aligns to it.
+Update the product's `agent_docs/` so the next `/product` invocation resumes cleanly.
 
 ---
 
